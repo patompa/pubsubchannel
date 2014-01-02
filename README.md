@@ -7,7 +7,9 @@ Javascript Frontend
 -------
 
 Add:
+```html
 	<script type="text/javascript" src="http://pubsubchannel.appspot.com/"></script>
+```
 
 where pubsubchanel is the app id of your Google App Engine application where the 
 channel is deployed.
