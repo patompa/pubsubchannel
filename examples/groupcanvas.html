@@ -1,0 +1,416 @@
+<html>
+<head>
+<title>Group Canvas</title>
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script src="http://pubsubchannel.appspot.com/"></script>
+
+
+   <script type="text/javascript">
+   
+var myPositions = {};
+var myCanvas;
+function createCanvasOverlay() {
+    var canvasContainer = document.createElement('div');
+   $('#mybody').get(0).appendChild(canvasContainer);
+    canvasContainer.style.position="absolute";
+    canvasContainer.style.left="0px";
+    canvasContainer.style.top="0px";
+    canvasContainer.style.width="100%";
+    canvasContainer.style.height="100%";
+    jQuery(canvasContainer).css("z-index",-1);
+    myCanvas = document.createElement('canvas');
+    myCanvas.style.width = canvasContainer.scrollWidth+"px";
+    myCanvas.style.height = canvasContainer.scrollHeight+"px";
+    myCanvas.width=canvasContainer.scrollWidth;
+    myCanvas.height=canvasContainer.scrollHeight;
+    myCanvas.style.overflow = 'visible';
+    myCanvas.style.position = 'absolute';
+    canvasContainer.appendChild(myCanvas);
+ }
+
+var context;
+function initCanvas() {
+	       createCanvasOverlay();
+	       var elem = myCanvas;
+	       if (elem && elem.getContext) {
+		       context = elem.getContext('2d');
+		       if (context) {
+                           context.strokeStyle = '#f00'; // red
+                           context.lineWidth   = 4;   
+		       }
+	       }
+	       initSnap();
+       }
+       var colorIndex = 0;
+       function drawMarker(idx) { 
+        context.fillStyle = getColor(myPositions[idx].color);
+	context.beginPath();
+	context.arc(myPositions[idx].x,myPositions[idx].y,2,0,360,0);
+	context.fill();
+       }
+       function drawLine(idx) { 
+        context.fillStyle = getColor(myPositions[idx].color);
+        context.strokeStyle = getColor(myPositions[idx].color);
+	context.lineWidth = 3;
+	context.beginPath();
+	context.moveTo(myPositions[idx].xold,myPositions[idx].yold);
+	context.lineTo(myPositions[idx].x,myPositions[idx].y);
+        context.fill();
+        context.stroke();
+       }
+       function drawPoint(idx,pos) { 
+	if (!myPositions[idx]) {
+	     myPositions[idx] = {posold:pos,pos:pos,color:colorIndex};
+	     colorIndex++;
+        } else {
+	     myPositions[idx].posold = pos;
+	     myPositions[idx].pos = pos;
+        }
+        context.fillStyle = getColor(myPositions[idx].color);
+        context.strokeStyle = getColor(myPositions[idx].color);
+	context.lineWidth = 3;
+        for (var i=0; i < myPositions[idx].pos.length; i++) {
+          if (myPositions[idx].posold.length > i) {
+	        context.beginPath();
+	        context.arc(myPositions[idx].pos[i]['x'],myPositions[idx].pos[i]['y'],4,0,360,0);
+                context.fill();
+          } 
+        }
+       }
+       function drawLines(idx) { 
+        context.fillStyle = getColor(myPositions[idx].color);
+        context.strokeStyle = getColor(myPositions[idx].color);
+	context.lineWidth = 3;
+        for (var i=0; i < myPositions[idx].pos.length; i++) {
+          if (myPositions[idx].posold.length > i) {
+	    context.beginPath();
+	    context.moveTo(myPositions[idx].posold[i]['x'],myPositions[idx].posold[i]['y']);
+	    context.lineTo(myPositions[idx].pos[i]['x'],myPositions[idx].pos[i]['y']);
+            context.stroke();
+            context.fill();
+          }
+        }
+       }
+       var colors = [ "#f00", "#00f", "#0f0", "#0ff", "#ff0", "#FFBF7F", "#FF7F00", "#FFFF99", "#FFFF32", "#B2FF8C", "#32FF00",
+                "#A5EDFF", "#19B2FF", "#CCBFFF", "#654CFF", "#FF99BF", "#E51932" ];
+       
+       function getColor(idx) {
+	       return colors[idx % 17];
+       }
+       function startLines(id,pos) {
+	       if (!myPositions[id]) {
+		       myPositions[id] = {posold:pos,pos:pos,color:colorIndex};
+		       colorIndex++;
+               } else {
+		       myPositions[id].posold = pos;
+		       myPositions[id].pos = pos;
+               }
+	       drawLines(id);
+       }
+       function startLine(id,x,y) {
+	       if (!myPositions[id]) {
+		       myPositions[id] = {xold:x,yold:y,x:x,y:y,color:colorIndex};
+		       colorIndex++;
+               } else {
+		       myPositions[id].xold = x;
+		       myPositions[id].yold = y;
+		       myPositions[id].x = x;
+		       myPositions[id].y = y;
+               }
+	       drawLine(id);
+       } 
+       function moveLines(id,pos) {
+	       if (!myPositions[id]) {
+		       myPositions[id] = {posold:pos,pos:pos,color:colorIndex};
+		       colorIndex++;
+               } else {
+		       myPositions[id].posold = myPositions[id].pos;
+		       myPositions[id].pos = pos;
+               }
+	       drawLines(id);
+       } 
+       function moveLine(id,x,y) {
+	       if (!myPositions[id]) {
+		       myPositions[id] = {xold:x,yold:y,x:x,y:y,color:colorIndex};
+		       colorIndex++;
+               } else {
+		       myPositions[id].xold = myPositions[id].x;
+		       myPositions[id].yold = myPositions[id].y;
+		       myPositions[id].x = x;
+		       myPositions[id].y = y;
+               }
+	       drawLine(id);
+       } 
+       function plotPos(id,x,y) {
+	       if (!myPositions[id]) {
+		       myPositions[id] = {xold:x,yold:y,x:x,y:y,color:colorIndex};
+		       colorIndex++;
+               } else {
+		       myPositions[id].x = x;
+		       myPositions[id].y = y;
+               }
+	       drawMarker(id);
+       } 
+       function gotPos(id,x,y) {
+	       if (!myPositions[id]) {
+		       var xpos = myCanvas.width/2;
+                       var ypos = myCanvas.height/2;
+		       myPositions[id] = {xold:x,yold:y,x:xpos,y:ypos,color:colorIndex};
+		       colorIndex++;
+		       drawMarker(id);
+		       return;
+	       }
+	       myPositions[id].x -= (myPositions[id].xold - x);
+	       myPositions[id].y -= (myPositions[id].yold - y);
+               myPositions[id].xold = x;
+               myPositions[id].yold = y;
+	       drawMarker(id);
+       }
+       function newPos(id,x,y) {
+	       if (!myPositions[id]) {
+		       var xpos = myCanvas.width/2;
+                       var ypos = myCanvas.height/2;
+		       myPositions[id] = {x:xpos,y:ypos,color:colorIndex};
+		       colorIndex++;
+		       drawMarker(id);
+		       return;
+	       }
+	       context.clearRect(myPositions[id].x-10,myPositions[id].y-10,myPositions[id].x+10,myPositions[id].y+10);
+	       myPositions[id].x -= Math.round(20*x);
+	       myPositions[id].y -= Math.round(20*y);
+	       drawMarker(id);
+       }
+       function clearCanvas(id) {
+	       context.clearRect(myPositions[id].x-10,myPositions[id].y-10,myPositions[id].x+10,myPositions[id].y+10);
+       }
+
+   </script>
+
+
+   <script type="text/javascript">
+       function processMessage(json) {
+          if (json.action == "Position") {
+                 if (json.message == "Stop") {
+                         context.clearRect(0,0,myCanvas.width,myCanvas.height);
+                         processingMsg = 0;
+                         return;
+                 }
+                 gotPos(json.id,json.xdiff,json.ydiff);
+         }
+         if (json.action == "PlotPositions") {
+                 for (var i=0; i<json.pos.length; i++) {
+                    if (i === 0) {
+                      startLine(json.id,json.pos[i].x,json.pos[i].y);
+                    } else {
+                      moveLine(json.id,json.pos[i].x,json.pos[i].y);
+                    }
+                 }
+         }
+         if (json.action == "PlotMultiPositions") {
+              plotMultiple(json);
+         }
+         if (json.action == "BackFromDraw") {
+         		goToNext();
+         }
+
+       }
+     
+      function plotMultiple(json) {
+                 if (json.pos.length == 1) {
+                   drawPoint(json.id,json.pos[0]);
+                   return;
+                 }
+                 for (var i=0; i<json.pos.length; i++) {
+                    if (i === 0) {
+                      startLines(json.id,json.pos[i]);
+                    } else {
+                      moveLines(json.id,json.pos[i]);
+                    }
+                 }
+      }
+
+
+     function S4() {
+           return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+     }
+
+     function guid() {
+             return (S4() + S4() + S4() + S4() + S4() + S4() + S4() + S4());
+     }
+
+
+   function getCookie(c_name) {
+  var cookies = document.cookie;
+  if (cookies.length > 0) {
+    c_start = cookies.indexOf(c_name + "=");
+    if (c_start != -1) {
+      c_start = c_start + c_name.length + 1;
+      c_end = cookies.indexOf(";", c_start);
+      if (c_end == -1) {
+        c_end = cookies.length;
+      }
+      return unescape(cookies.substring(c_start, c_end));
+    }
+  }
+  return "";
+   }
+
+  function setCookie(c_name, value, expiredays) {
+    var exdate = new Date();
+    exdate.setDate(exdate.getDate() + expiredays);
+    document.cookie = c_name + "=" + escape(value) + ((expiredays == null) ? "" : ";expires=" + exdate.toUTCString());
+  }
+
+
+
+     function getId() {
+      did = getCookie('did');
+      if (did === "") {
+        did = guid();
+        setCookie('did',did,7);
+      }
+      return did;
+     }
+
+     function getUser() {
+         return "";
+     }
+
+    function gup(name) { // get url params
+        name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+        var regexS = "[\\?&]" + name + "=([^&#]*)";
+        var regex = new RegExp(regexS);
+        var results = regex.exec(window.location.href);
+        if (results == null)
+                return "";
+        else
+                return results[1];
+   }
+
+
+      function getGroup() {
+            var snapgroup =  window.location.hash.substring(1).split("?")[0];
+            if (snapgroup === "") {
+                 snapgroup = gup("group");
+            }
+            return snapgroup;
+      }
+
+			function getNext() {
+				return window.location.hash.substring(1).split("?")[1].substring(5);
+			}
+
+
+ 
+ function sktSend(json) {
+            json.id = getId();
+            json.group = getGroup();
+	    console.log(json)
+            PubSub.publish(getGroup(),json);
+      }
+      var socket;
+
+      var talkId;
+      function initSnap() {
+           talkId = getId();
+	   PubSub.subscribe(getGroup(),processMessage);
+      }
+
+
+
+      var myoffset;
+      function initTouch() {
+           initCanvas(); 
+           if (typeof(jQuery('.mybody').draggable) !== "undefined") {
+               jQuery('.mybody').draggable("destroy");
+           }
+           document.onmousemove = mouseMoveDummy;
+           document.onmousedown = mouseDown;
+           document.onmouseup = mouseUp;
+           document.ontouchstart = mouseDown;
+           document.ontouchbegin = mouseDown;
+           document.ontouchmove = mouseMove;
+           document.ontouchend = mouseUp;
+           $('#captureButton').click(function (e) {capture();});
+           myoffset = $("#mybody").offset().top;
+       }
+       function isIOS() {
+          var iPhone = /iPhone/i.test(navigator.userAgent);
+          var iPad = /iPad/i.test(navigator.userAgent);
+          var iPod = /iPod/i.test(navigator.userAgent);
+          var mob = /Mobile Safari/i.test(navigator.userAgent);
+          return iPhone || iPad || iPod || mob;
+       }
+       function mouseMoveDummy(event) {
+           return false;
+       }
+       function mouseMove(event) {
+          setEvent("move",event);
+          return false;
+       }
+       function mouseDown(event) {
+          setEvent("down",event);
+          return isIOS();
+       }
+       function mouseUp(event) {
+          setEvent("up",event);
+          return isIOS();
+       }
+       var currentpos = [];
+       var multitouch = false;
+       function setEvent(eventname,event) {
+         if (typeof(event.touches) === 'undefined' && event.pageY < myoffset) {
+             return;
+         } 
+         document.getElementById("eventname").innerHTML = eventname;
+         if (eventname === "up") {
+             sktSend({'action':"PlotMultiPositions",
+                                            'pos': currentpos});
+             if (currentpos.length == 1) {
+                drawPoint(talkId,currentpos[0]);
+             } 
+             currentpos = [];
+             document.onmousemove = mouseMoveDummy;
+             return;
+         }
+         var pos = []
+         pos[0] = {'x':event.pageX,'y':event.pageY};
+
+         if (typeof(event.touches) !== 'undefined') {
+           pos = [];
+           for (var i=0; i < event.touches.length; i++) {
+             var targetEvent = event.touches.item(i);
+             if (targetEvent.clientY > myoffset) {
+               pos.push({'x': targetEvent.clientX,'y':targetEvent.clientY});
+             }
+           }
+         }
+         document.getElementById("xy").innerHTML = " " + 
+                        pos[0]['x'] + " " + pos[0]['y'];
+         currentpos.push(pos);
+         if (currentpos.length == 1) {
+             startLines(talkId,pos); 
+         } else {
+             moveLines(talkId,pos); 
+         }
+         document.getElementById("eventname").innerHTML = "Pushed";
+         if (eventname === "down") {
+               starting = true;
+               currentpos = [];
+               currentpos.push(pos);
+               document.onmousemove = mouseMove;
+         }
+       }
+
+       
+    </script>
+
+</head>
+<body onload="initTouch()">
+   <div id="mybody">
+   <div id="eventname" style="visibility:hidden"></div><br>
+   <div id="xy" style="visibility:hidden"></div><br>
+   </div>
+</body>
+</html>
+
