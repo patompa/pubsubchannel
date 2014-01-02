@@ -30,6 +30,13 @@ In the pubsub.js file change APP_ID to your google app engine application id.
 
 A live demo deployment is avalable at pubsubchannel.appspot.com 
 
+Examples
+-------
+
+[Hello World] (http://htmlpreview.github.io/?https://github.com/patompa/pubsubchannel/blob/master/examples/helloworld.html)
+[Group Canvas] (http://htmlpreview.github.io/?https://github.com/patompa/pubsubchannel/blob/master/examples/groupcanvas.html?group=demo)
+
+
 
 
 
