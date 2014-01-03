@@ -1,7 +1,7 @@
 pubsubchannel
 =============
 
-A Hosted Publish Subscribe Event Channel on Google App Engine using Channels
+A Hosted Publish Subscribe Event Channel on Google App Engine using the Channel and TaskQueue APIs
 
 Javascript Frontend
 -------
