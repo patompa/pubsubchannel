@@ -1,7 +1,8 @@
 pubsubchannel
 =============
 
-A Hosted Publish Subscribe Event Channel on Google App Engine using the Channel and TaskQueue Services.
+A Hosted Multi-tenant Web and Native Publish-Subscribe Event Channel for Google App Engine.
+The Event Channel utilizes the App Engine services Channels, Task Queues, Memcache, and Namespaces.
 
 Javascript Frontend
 -------
