@@ -17,6 +17,10 @@ window['PubSub'] = function () {
 	  return clientId;
   }
 
+  function setAppID(app) {
+      APP_ID = app;
+  }
+
   function subscribe(group, callback) {
       $.getJSON('http://' + APP_ID + '.appspot.com/subscribe?group=' + group + "&client=" + clientId + "&callback=?", function(result) {
 			   token = result.token;
@@ -41,6 +45,7 @@ window['PubSub'] = function () {
 
   return {'id':id,
 	  'subscribe': subscribe,
+	  'setAppID': setAppID,
 	  'publish': publish };
 
 }();
