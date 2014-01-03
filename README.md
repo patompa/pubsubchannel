@@ -53,7 +53,9 @@ The callback will be called in a separate thread. To stop listening to events ca
 
 Subscribe may be called any number of times but listen should only be called once per client.
 To send events call
+
 	channel.publish("demo",message)
+
 where message must be a json serializable object.
 Note, the App Engine TaskQueue API is used internally but it is not exposed in the REST API
 used by the python client, hence the app engine auth rules do not apply.
