@@ -1,14 +1,15 @@
 window['PubSub'] = function () {
 
   var token;
-  var APP_ID = 'pubsubchannel';
-
+  var APP_ID = "pubsubchannel";
+  var namespace = "";
+  
   function S4() {
            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
      }
 
   function guid() {
-             return (S4() + S4() + S4() + S4() + S4() + S4() + S4() + S4());
+           return (S4() + S4() + S4() + S4() + S4() + S4() + S4() + S4());
   }
 
   var clientId = guid();
@@ -16,13 +17,24 @@ window['PubSub'] = function () {
   function id() {
 	  return clientId;
   }
+  function setNamespace(ns) {
+	  namespace = ns;
+  }
 
   function setAppID(app) {
-      APP_ID = app;
+          APP_ID = app;
+  }
+
+  function getNS() {
+      var nsparam = "";
+      if (namespace !=+ "") {
+	      nsparam = "&namespace=" + namespace;
+      }
+      return nsparam;
   }
 
   function subscribe(group, callback) {
-      $.getJSON('http://' + APP_ID + '.appspot.com/subscribe?group=' + group + "&client=" + clientId + "&callback=?", function(result) {
+      $.getJSON('http://' + APP_ID +'.appspot.com/subscribe?group=' + group + "&client=" + clientId + getNS() + "&callback=?", function(result) {
 			   token = result.token;
 			   channel = new goog.appengine.Channel(result.token);
 			   socket = channel.open()
@@ -35,7 +47,7 @@ window['PubSub'] = function () {
   }
 
   function publish(group,json) {
-   $.ajax({url:'http://' + APP_ID + '.appspot.com/publish?group=' + group + "&token=" + token,
+   $.ajax({url:'http://' + APP_ID + '.appspot.com/publish?group=' + group + "&token=" + token + getNS(),
 	   data: JSON.stringify(json),
            type: "POST",
            beforeSend: function(xhr) {
@@ -44,8 +56,9 @@ window['PubSub'] = function () {
   }
 
   return {'id':id,
-	  'subscribe': subscribe,
+	  'setNamespace': setNamespace,
 	  'setAppID': setAppID,
+	  'subscribe': subscribe,
 	  'publish': publish };
 
 }();

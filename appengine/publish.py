@@ -3,8 +3,9 @@
 from google.appengine.ext import webapp
 from google.appengine.api import memcache
 from google.appengine.api import channel
-import json
 from google.appengine.api import taskqueue
+from google.appengine.api import namespace_manager
+import json
 
 class PublishHandler(webapp.RequestHandler):
     def options(self):
@@ -19,6 +20,10 @@ class PublishHandler(webapp.RequestHandler):
         self.response.headers['Access-Control-Allow-Content-Type'] = 'application/json'
         group = self.request.get('group')
         intoken = self.request.get('token')
+        ns = self.request.get('namespace')
+        if ns != "":
+            namespace_manager.set(ns)
+            
         tokens = memcache.get(group)
         try:
           body = self.request.body

@@ -3,12 +3,17 @@
 from google.appengine.ext import webapp
 from google.appengine.api import memcache
 from google.appengine.api import channel
+from google.appengine.api import namespace_manager
 import json
+
 
 class SubscribeHandler(webapp.RequestHandler):
     def get(self):
         clientid = self.request.get('client')
         group = self.request.get('group')
+        ns = self.request.get('namespace')
+        if ns != "":
+            namespace_manager.set(ns)
 
         if clientid.startswith("PULL_"):
             token = clientid
