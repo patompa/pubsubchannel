@@ -1,0 +1,6 @@
+#! /bin/bash
+APP_ID=pubsubchannel
+ID=`uuidgen | sed 's/-//g'`
+GROUP=$1
+MESSAGE=$2
+curl -s -X POST --data "$MESSAGE" "http://${APP_ID}.appspot.com/publish?group=${GROUP}&token=" --header "Content-Type:application/json"

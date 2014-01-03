@@ -1,0 +1,11 @@
+#! /bin/bash
+APP_ID=pubsubchannel
+ID=`uuidgen | sed 's/-//g'`
+GROUP=$1
+curl -s "http://${APP_ID}.appspot.com/subscribe?group=${GROUP}&client=PULL_${ID}" >/dev/null
+while [ 1 ]; do
+  OUT=`curl -s "http://${APP_ID}.appspot.com/pull?client=PULL_${ID}"`
+  if [ "${OUT}" != "{\"messages\": []}" ]; then
+    echo $OUT
+  fi
+done

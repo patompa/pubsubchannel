@@ -64,6 +64,18 @@ The python client depends on the requests package which can be installed with
 
 	pip install requests
 
+Curl REST Demo clients
+-------
+Two scripts are included to demonstrate the REST API using Curl.
+
+	clients/subscribe <channel>
+
+where channel is the channel you want to subscribe to.
+
+	clients/publish <channel> <json>
+
+where <json> is a json encoded string.
+
 Examples
 -------
 
