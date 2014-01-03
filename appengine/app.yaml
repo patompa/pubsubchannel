@@ -18,3 +18,5 @@ handlers:
 - url: /subscribe
   script: subscribe.app
 
+- url: /pull
+  script: pull.app

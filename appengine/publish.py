@@ -4,6 +4,7 @@ from google.appengine.ext import webapp
 from google.appengine.api import memcache
 from google.appengine.api import channel
 import json
+from google.appengine.api import taskqueue
 
 class PublishHandler(webapp.RequestHandler):
     def options(self):
@@ -24,7 +25,14 @@ class PublishHandler(webapp.RequestHandler):
           for token in tokens:
             if token != intoken:
                 message = json.loads(body);
-                channel.send_message(token,json.dumps(message))
+                if token.startswith("PULL_"):
+                    q = taskqueue.Queue('pull-queue')
+                    tasks = []
+                    payload_str = json.dumps(message)
+                    tasks.append(taskqueue.Task(payload=payload_str, method='PULL',tag=token))
+                    q.add(tasks)
+                else:
+                    channel.send_message(token,json.dumps(message))
         except Exception, inst:
             self.response.write(inst)
             self.response.write(" " + body)

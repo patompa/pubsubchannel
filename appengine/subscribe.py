@@ -9,7 +9,12 @@ class SubscribeHandler(webapp.RequestHandler):
     def get(self):
         clientid = self.request.get('client')
         group = self.request.get('group')
-        token = channel.create_channel(clientid)
+
+        if clientid.startswith("PULL_"):
+            token = clientid
+        else:
+            token = channel.create_channel(clientid)
+
         tokens = memcache.get(group)
         if tokens is None:
             tokens = []
