@@ -52,7 +52,7 @@ class PollThread(threading.Thread):
 
   def run(self):
    while not self.stopped:
-     url = self.SERVER + 'pull?client=' + self.client + getNS()
+     url = self.SERVER + 'pull?client=' + self.client + self.getNS()
      r = requests.get(url)
      messages = json.loads(r.text)['messages']
      for msg in messages:
