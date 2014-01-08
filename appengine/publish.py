@@ -14,6 +14,7 @@ class PublishHandler(webapp.RequestHandler):
         self.response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         self.response.headers['Access-Control-Allow-Content-Type'] = 'application/json'
     def post(self):
+	import time
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.headers['Access-Control-Allow-Method'] = 'POST'
         self.response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
@@ -31,11 +32,19 @@ class PublishHandler(webapp.RequestHandler):
             if token != intoken:
                 message = json.loads(body);
                 if token.startswith("PULL_"):
-                    q = taskqueue.Queue('pull-queue')
-                    tasks = []
-                    payload_str = json.dumps(message)
-                    tasks.append(taskqueue.Task(payload=payload_str, method='PULL',tag=token))
-                    q.add(tasks)
+                    messages = memcache.get(token)
+		    if messages is None:
+			    messages = [{'message':body,'time':time.time()}]
+		    else:
+			    messages.append({'message':body,'time':time.time()})
+		    memcache.set(token,messages,60*60*24)
+		    # task queues may be used here but they tend to eat up quota
+		    #
+                    #q = taskqueue.Queue('pull-queue')
+                    #tasks = []
+                    #payload_str = json.dumps(message)
+                    #tasks.append(taskqueue.Task(payload=payload_str, method='PULL',tag=token))
+                    #q.add(tasks)
                 else:
                     channel.send_message(token,json.dumps(message))
         except Exception, inst:

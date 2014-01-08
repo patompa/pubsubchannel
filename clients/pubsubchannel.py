@@ -57,7 +57,7 @@ class PollThread(threading.Thread):
      messages = json.loads(r.text)['messages']
      for msg in messages:
        if self.callback is not None:
-           self.callback(json.loads(msg))
+           self.callback(msg)
        else:
            print msg
 

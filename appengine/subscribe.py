@@ -8,7 +8,16 @@ import json
 
 
 class SubscribeHandler(webapp.RequestHandler):
+    def options(self):
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        self.response.headers['Access-Control-Allow-Method'] = 'OPTIONS,POST,GET'
+        self.response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        self.response.headers['Access-Control-Allow-Content-Type'] = 'application/json'
     def get(self):
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        self.response.headers['Access-Control-Allow-Method'] = 'OPTIONS,POST,GET'
+        self.response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        self.response.headers['Access-Control-Allow-Content-Type'] = 'application/json'
         clientid = self.request.get('client')
         group = self.request.get('group')
         ns = self.request.get('namespace')

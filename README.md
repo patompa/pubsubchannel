@@ -2,7 +2,8 @@ pubsubchannel
 =============
 
 A Hosted Multi-tenant Web and Native Publish-Subscribe Event Channel for Google App Engine.
-The Event Channel utilizes the App Engine services Channels, Task Queues, Memcache, and Namespaces.
+The Event Channel utilizes the App Engine services Channels, Memcache, and Namespaces.
+Taske Queues may also be used but they require more quota.
 
 Javascript Frontend
 -------
