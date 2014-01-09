@@ -7,5 +7,7 @@ while [ 1 ]; do
   OUT=`curl -s "http://${APP_ID}.appspot.com/pull?client=PULL_${ID}"`
   if [ "${OUT}" != "{\"messages\": []}" ]; then
     echo $OUT
+  else 
+    echo "TIMEOUT `date`" 
   fi
 done
