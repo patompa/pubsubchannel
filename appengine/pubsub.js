@@ -2,6 +2,7 @@ window['PubSub'] = function () {
 
   var token;
   var APP_ID = "pubsubchannel";
+  var RENEW_INTERVAL = 60000;
   var namespace = "";
   
   function S4() {
@@ -37,7 +38,15 @@ window['PubSub'] = function () {
       $.getJSON('http://' + APP_ID +'.appspot.com/subscribe?group=' + group + "&client=" + clientId + getNS(), function(result) {
 			   token = result.token;
 			   poll(callback);
+                           setTimeout(function() {renew(group)},RENEW_INTERVAL);
                });
+  }
+
+  function renew(group) {
+      $.getJSON('http://' + APP_ID +'.appspot.com/subscribe?group=' + group + "&client=" + clientId + getNS(), function(result) {
+		      console.log(result);
+      });
+      setTimeout(function() {renew(group)},RENEW_INTERVAL);
   }
 
   function poll(callback) {
