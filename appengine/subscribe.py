@@ -32,6 +32,9 @@ class SubscribeHandler(webapp.RequestHandler):
           return True
       return False
 
+    def post(self):
+        self.get()
+
     def get(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.headers['Access-Control-Allow-Method'] = 'OPTIONS,POST,GET'
