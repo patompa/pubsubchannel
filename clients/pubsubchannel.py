@@ -10,6 +10,7 @@ class pubsubchannel(object):
     self.client = "PULL_" + str(uuid.uuid4()).replace('-','') 
     self.token = ""
     self.threads = []
+    self.groups = []
     self.namespace=namespace
 
   def getNS(self):
@@ -25,9 +26,10 @@ class pubsubchannel(object):
    url = self.SERVER + 'subscribe?group=' + group + '&client=' + self.client + self.getNS()
    r = requests.get(url)
    self.token = json.loads(r.text)['token']
+   self.groups.append(group)
 
   def listen(self,callback=None):
-   thread = PollThread(self.client,self.SERVER,self.namespace,callback)
+   thread = PollThread(self.client,self.SERVER,self.namespace,self.groups,callback)
    thread.start()
    self.threads.append(thread)
 
@@ -37,13 +39,18 @@ class pubsubchannel(object):
        thread.join()
 
 class PollThread(threading.Thread):
-  def __init__(self,client,SERVER,namespace,callback):
+  def __init__(self,client,SERVER,namespace,groups,callback):
       threading.Thread.__init__(self)
       self.client = client    
       self.callback = callback
       self.stopped = False
       self.SERVER = SERVER
       self.namespace = namespace
+      self.groups = groups
+
+  def resubscribe(self,group):
+   url = self.SERVER + 'subscribe?group=' + group + '&client=' + self.client + self.getNS()
+   r = requests.get(url)
 
   def getNS(self):
     if self.namespace == "":
@@ -51,6 +58,8 @@ class PollThread(threading.Thread):
     return "&namespace=" + self.namespace
 
   def run(self):
+   import time
+   lastsubscribe = time.time()
    while not self.stopped:
      url = self.SERVER + 'pull?client=' + self.client + self.getNS()
      r = requests.get(url)
@@ -60,6 +69,10 @@ class PollThread(threading.Thread):
            self.callback(msg)
        else:
            print msg
+     if time.time() - lastsubscribe > 60:
+         lastsubscribe = time.time()
+         for group in self.groups:
+             self.resubscribe(group) 
 
 if __name__ == '__main__':
     import sys
