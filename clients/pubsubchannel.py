@@ -5,13 +5,14 @@ import json
 import threading
 
 class pubsubchannel(object):
-  def __init__(self,server="http://pubsubchannel.appspot.com/",namespace=""):
+  def __init__(self,server="http://pubsubchannel.appspot.com/",namespace="",logfile=""):
     self.SERVER = server
     self.client = "PULL_" + str(uuid.uuid4()).replace('-','') 
     self.token = ""
     self.threads = []
     self.groups = []
     self.namespace=namespace
+    self.logfile=logfile
 
   def getNS(self):
     if self.namespace == "":
@@ -29,7 +30,7 @@ class pubsubchannel(object):
    self.groups.append(group)
 
   def listen(self,callback=None):
-   thread = PollThread(self.client,self.SERVER,self.namespace,self.groups,callback)
+   thread = PollThread(self.client,self.SERVER,self.namespace,self.groups,self.logfile,callback)
    thread.start()
    self.threads.append(thread)
 
@@ -39,7 +40,7 @@ class pubsubchannel(object):
        thread.join()
 
 class PollThread(threading.Thread):
-  def __init__(self,client,SERVER,namespace,groups,callback):
+  def __init__(self,client,SERVER,namespace,groups,logfile,callback):
       threading.Thread.__init__(self)
       self.client = client    
       self.callback = callback
@@ -47,6 +48,7 @@ class PollThread(threading.Thread):
       self.SERVER = SERVER
       self.namespace = namespace
       self.groups = groups
+      self.logfile = logfile
 
   def resubscribe(self,group):
    url = self.SERVER + 'subscribe?group=' + group + '&client=' + self.client + self.getNS()
@@ -57,16 +59,30 @@ class PollThread(threading.Thread):
         return ""
     return "&namespace=" + self.namespace
 
+  def logError(self,message, error):
+      import time
+      if self.logfile == "":
+          return
+      f = open(logfile,'a')
+      f.write("[%.2f] %s: %s\n" % (time.time(),message,error)) 
+      f.close()
+
   def run(self):
    import time
    lastsubscribe = time.time()
    while not self.stopped:
      url = self.SERVER + 'pull?client=' + self.client + self.getNS()
      r = requests.get(url)
-     messages = json.loads(r.text)['messages']
+     try:
+       messages = json.loads(r.text)['messages']
+     except Exception, inst:
+         self.logError("JSON Error",inst)
      for msg in messages:
        if self.callback is not None:
-           self.callback(msg)
+           try:
+             self.callback(msg)
+           except Exception, inst:
+             self.logError("Callback Error",inst)
        else:
            print msg
      if time.time() - lastsubscribe > 60:
