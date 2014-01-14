@@ -63,8 +63,8 @@ class PollThread(threading.Thread):
       import time
       if self.logfile == "":
           return
-      f = open(logfile,'a')
-      f.write("[%.2f] %s: %s\n" % (time.time(),message,error)) 
+      f = open(self.logfile,'a')
+      f.write("[%.2f] %s: %s %s\n" % (time.time(),message,type(error).__name__,error)) 
       f.close()
 
   def run(self):
