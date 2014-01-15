@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Pubsubchannel by patompa</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Pubsubchannel</h1>
+        <h2>Hosted Multi-tenant Web and Native Publish-Subscribe Event Channel for Google App Engine</h2>
+        <a href="https://github.com/patompa/pubsubchannel" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a name="pubsubchannel" class="anchor" href="#pubsubchannel"><span class="octicon octicon-link"></span></a>pubsubchannel</h1>
+
+<p>A Hosted Multi-tenant Web and Native Publish-Subscribe Event Channel for Google App Engine.
+The Event Channel utilizes the App Engine services Memcache (CAS), and Namespaces.
+Task Queues and Channels were used in early versions but dropped because they
+require more quota, and have no garbage collection control respectively.</p>
+
+<h2>
+<a name="javascript-frontend" class="anchor" href="#javascript-frontend"><span class="octicon octicon-link"></span></a>Javascript Frontend</h2>
+
+<p>Add:</p>
+
+<div class="highlight highlight-html"><pre>    <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"http://pubsubchannel.appspot.com/"</span><span class="nt">&gt;&lt;/script&gt;</span>
+</pre></div>
+
+<p>where pubsubchannel is the app id of your Google App Engine application where the 
+channel is deployed.</p>
+
+<p>To send messages call:</p>
+
+<pre><code>PubSub.publish("demo",{'msg':"Hello world from " + PubSub.id()});
+</code></pre>
+
+<p>To receive messages call:</p>
+
+<pre><code>PubSub.subscribe("demo",function (json) {console.log(json.msg)});
+</code></pre>
+
+<h2>
+<a name="google-app-engine-backend" class="anchor" href="#google-app-engine-backend"><span class="octicon octicon-link"></span></a>Google App Engine Backend</h2>
+
+<p>In the app.yaml file change the APP_ID to your google app engine application id.
+In the pubsub.js file change APP_ID to your google app engine application id.</p>
+
+<p>A live demo deployment is avalable at pubsubchannel.appspot.com </p>
+
+<h2>
+<a name="native-python-client" class="anchor" href="#native-python-client"><span class="octicon octicon-link"></span></a>Native Python Client</h2>
+
+<p>For non-browser clients there is a long-polling REST interface based on App Engine Task Queues.
+The only thing the client needs to do is to call the pull REST API as exemplified by the
+python client in the distribution. The example python client depends on the requests
+and threading packages, but any http client library may be used.</p>
+
+<p>To listen to events on the demo channel use the following code  </p>
+
+<pre><code>import pubsubchannel
+import json
+def callback(data):
+  print json.dumps(data)
+channel = pubsubchannel()
+channel.subscribe("demo")
+channel.listen(callback=callback)
+</code></pre>
+
+<p>The callback will be called in a separate thread. To stop listening to events call</p>
+
+<pre><code>channel.stop()
+</code></pre>
+
+<p>Subscribe may be called any number of times but listen should only be called once per client.
+To send events call</p>
+
+<pre><code>channel.publish("demo",message)
+</code></pre>
+
+<p>where message must be a json serializable object.
+Note, the App Engine TaskQueue API is used internally but it is not exposed in the REST API
+used by the python client, hence the app engine auth rules do not apply.
+The python client depends on the requests package which can be installed with</p>
+
+<pre><code>pip install requests
+</code></pre>
+
+<h2>
+<a name="curl-rest-demo-clients" class="anchor" href="#curl-rest-demo-clients"><span class="octicon octicon-link"></span></a>Curl REST Demo clients</h2>
+
+<p>Two scripts are included to demonstrate the REST API using Curl.</p>
+
+<pre><code>clients/subscribe channel
+</code></pre>
+
+<p>where channel is the channel you want to subscribe to.</p>
+
+<pre><code>clients/publish channel json
+</code></pre>
+
+<p>where json is a json encoded string.</p>
+
+<h2>
+<a name="examples" class="anchor" href="#examples"><span class="octicon octicon-link"></span></a>Examples</h2>
+
+<p><a href="http://htmlpreview.github.io/?https://github.com/patompa/pubsubchannel/blob/master/examples/helloworld.html">Hello World</a></p>
+
+<p><a href="http://htmlpreview.github.io/?https://github.com/patompa/pubsubchannel/blob/master/examples/groupcanvas.html?group=demo">Group Canvas</a></p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/patompa/pubsubchannel/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/patompa/pubsubchannel/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/patompa/pubsubchannel"></a> is maintained by <a href="https://github.com/patompa">patompa</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
