@@ -1,0 +1,26 @@
+<html>
+<head>
+<title>Hello world</title>
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script type="text/javascript" src="http://pubsubchannel.appspot.com/"></script>
+
+   <script type="text/javascript">
+       function processMessage(json) {
+           console.log(json);
+           $('#log').html(json.msg);
+       }
+     
+      function initApp() {
+           PubSub.subscribe("demo",processMessage);
+      }
+      function sendMessage() {
+           PubSub.publish("demo",{'msg':"Hello world from " + PubSub.id()});
+      }
+
+    </script>
+</head>
+<body onload="initApp()">
+        <button onclick="sendMessage()">Send</button><br/>
+        <div id="log">
+</body>
+</html>
