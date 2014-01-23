@@ -1,7 +1,7 @@
 window['PubSub'] = function () {
 
   var token;
-  var APP_ID = "pubsubchannel";
+  var APP_ID = "http://pubsubchannel.appspot.com";
   var RENEW_INTERVAL = 60000;
   var namespace = "";
   
@@ -35,7 +35,7 @@ window['PubSub'] = function () {
   }
 
   function subscribe(group, callback) {
-      $.getJSON('http://' + APP_ID +'.appspot.com/subscribe?group=' + group + "&client=" + clientId + getNS(), function(result) {
+      $.getJSON(APP_ID + '/subscribe?group=' + group + "&client=" + clientId + getNS(), function(result) {
 			   token = result.token;
 			   poll(callback);
                            setTimeout(function() {renew(group)},RENEW_INTERVAL);
@@ -43,14 +43,14 @@ window['PubSub'] = function () {
   }
 
   function renew(group) {
-      $.getJSON('http://' + APP_ID +'.appspot.com/subscribe?group=' + group + "&client=" + clientId + getNS(), function(result) {
+      $.getJSON(APP_ID + '/subscribe?group=' + group + "&client=" + clientId + getNS(), function(result) {
 		      console.log(result);
       });
       setTimeout(function() {renew(group)},RENEW_INTERVAL);
   }
 
   function poll(callback) {
-      $.getJSON('http://' + APP_ID +'.appspot.com/pull?client=' + clientId + getNS(), function(result) {
+      $.getJSON(APP_ID + '/pull?client=' + clientId + getNS(), function(result) {
 	   try {
 	      for (var i=0; i < result.messages.length; i++) {
 	           callback(result.messages[i]);
@@ -71,7 +71,7 @@ window['PubSub'] = function () {
   }
 
   function publish(group,json) {
-   $.ajax({url:'http://' + APP_ID + '.appspot.com/publish?group=' + group + "&token=" + token + getNS(),
+   $.ajax({url:APP_ID + '/publish?group=' + group + "&token=" + token + getNS(),
 	   data: JSON.stringify(json),
            type: "POST",
            beforeSend: function(xhr) {
