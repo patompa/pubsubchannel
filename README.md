@@ -85,7 +85,7 @@ Examples
 
 [Group Canvas] (http://patompa.github.io/pubsubchannel/groupcanvas.html?group=demo)
 
-
+[![endorse](https://api.coderwall.com/patompa/endorsecount.png)](https://coderwall.com/patompa)
 
 
 
