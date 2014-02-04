@@ -36,8 +36,13 @@ class pubsubchannel(object):
 
   def stop(self):
      for thread in self.threads:
-       thread.stopped = True
+       thread.stopRun()
+       mytoken = self.token
+       self.token = ""
+       for group in self.groups:
+          self.publish(group,{'action':'stopped', 'id':mytoken})
        thread.join()
+
 
 class PollThread(threading.Thread):
   def __init__(self,client,SERVER,namespace,groups,logfile,callback):
@@ -53,6 +58,9 @@ class PollThread(threading.Thread):
   def resubscribe(self,group):
    url = self.SERVER + 'subscribe?group=' + group + '&client=' + self.client + self.getNS()
    r = requests.get(url)
+
+  def stopRun(self):
+    self.stopped = True
 
   def getNS(self):
     if self.namespace == "":
@@ -75,16 +83,16 @@ class PollThread(threading.Thread):
      r = requests.get(url)
      try:
        messages = json.loads(r.text)['messages']
-     except Exception, inst:
+     except Exception as inst:
          self.logError("JSON Error",inst)
      for msg in messages:
        if self.callback is not None:
            try:
              self.callback(msg)
-           except Exception, inst:
+           except Exception as inst:
              self.logError("Callback Error",inst)
        else:
-           print msg
+           print(msg)
      if time.time() - lastsubscribe > 60:
          lastsubscribe = time.time()
          for group in self.groups:
@@ -94,25 +102,25 @@ if __name__ == '__main__':
     import sys
     USAGE = "Usage: pubsubchannel <publish>|<subscribe> <group> (<message>)"
     if len(sys.argv) < 3 :
-       print USAGE
+       print(USAGE)
        sys.exit(1)
     action = sys.argv[1]
     group = sys.argv[2]
     if action == "subscribe":
         if len(sys.argv) != 3:
-            print USAGE
+            print(USAGE)
             sys.exit(1) 
         channel = pubsubchannel()
         channel.subscribe(group)
         channel.listen()
-        print "Press Enter to exit."
+        print("Press Enter to exit.")
         sys.stdin.read(1)
-        print "Exiting...."
+        print("Exiting....")
         channel.stop()
         sys.exit(0)
     elif action == "publish":
         if len(sys.argv) != 4:
-            print USAGE
+            print(USAGE)
             sys.exit(1) 
         message = json.loads(sys.argv[3])
         channel = pubsubchannel()
